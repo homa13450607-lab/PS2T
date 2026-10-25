@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سامانه تبدیل گفتار به متن | HD</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- هدر اختصاصی سامانه با برند HD -->
+    <header class="header-container">
+        <div class="brand-section">
+            <img src="{{ url_for('static', filename='logo.jpg') }}" alt="HD Logo" class="brand-logo">
+            <div>
+                <h1 class="brand-title">سامانه هوشمند تبدیل گفتار به متن (PS2T)</h1>
+                <div class="brand-slogan">Precision In Every Digital Byte</div>
+            </div>
+        </div>
+    </header>
+
+    <main style="padding: 40px 20px; max-width: 900px; margin: 0 auto;">
+        <div class="hardware-card">
+            <h2>بارگذاری فایل صوتی</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">فایل صوتی خود را (MP3, WAV) بارگذاری کنید تا هوش مصنوعی به صورت کاملاً آفلاین آن را پیاده‌سازی کند.</p>
+            
+            <form action="/upload" method="POST" enctype="multipart/form-data" style="margin-top: 20px;">
+                <input type="file" name="audio_file" accept="audio/*" required style="background: var(--bg-primary); padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; width: 100%; color: white; margin-bottom: 15px;">
+                <button type="submit" style="background-color: var(--brand-color); color: white; border: none; padding: 12px 25px; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: bold; transition: 0.3s;">شروع تبدیل هوشمند</button>
+            </form>
+        </div>
+
+        {% if transcript %}
+        <div class="hardware-card" style="margin-top: 30px;">
+            <h3>نتیجه تبدیل صوت:</h3>
+            <textarea readonly style="width: 100%; height: 250px; background: var(--bg-primary); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; font-family: inherit; font-size: 1rem; margin-top: 10px; resize: vertical;">{{ transcript }}</textarea>
+        </div>
+        {% endif %}
+    </main>
+
+    <!-- فوتر با کپی‌رایت اختصاصی برند -->
+    <footer class="copyright-footer">
+        تمامی حقوق محفوظ است. طراحی‌شده با <strong>HD</strong> — <em>Precision In Every Digital Byte</em>
+    </footer>
+
+</body>
+</html>

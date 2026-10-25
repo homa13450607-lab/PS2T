@@ -1,0 +1,12 @@
+[2026-08-02 05:01:26] [INFO] [jobs]: Job created: 1257b64a-d9b8-45d6-ad18-5859ace3ceec for file: Found_10aba72000-27e2e40.mp4
+[2026-08-02 05:01:26] [ERROR] [jobs]: Job failed: 1257b64a-d9b8-45d6-ad18-5859ace3ceec | Error: خطا در استخراج فایل صوتی با FFmpeg
+[2026-08-02 05:02:15] [INFO] [jobs]: Job created: d1668bba-4208-4fe2-8f83-11475294512f for file: Alireza Talischi - Na Nemiaram.mp3
+[2026-08-02 05:02:15] [ERROR] [jobs]: Job failed: d1668bba-4208-4fe2-8f83-11475294512f | Error: خطا در استخراج فایل صوتی با FFmpeg
+[2026-08-02 05:11:15] [INFO] [jobs]: Job created: 26d2c3fe-b662-403e-b3c3-fb864911f9c3 for file: Ali Abdolmaleki - Taje Sar.mp3
+[2026-08-02 05:20:34] [INFO] [jobs]: Job created: 1dfd52f6-cf5d-4e26-9cf0-e3e1360744a7 for file: Ali Abdolmaleki - Taje Sar.mp3
+[2026-08-02 05:27:59] [INFO] [jobs]: Job created: 8972c01d-df90-4a5b-860a-af28e2a62f4b for file: Ali Abdolmaleki - Taje Sar.mp3
+[2026-08-02 05:37:41] [INFO] [jobs]: Job created: 8ba7812e-f295-47c1-8e4a-a922f628f8ec for file: Ali Abdolmaleki - Taje Sar.mp3
+[2026-08-02 05:47:44] [INFO] [jobs]: Job created: bc048b5a-8515-47c3-93e9-7c3a4aa4b569 for file: Ali Abdolmaleki - Taje Sar.mp3
+[2026-08-02 09:31:32] [INFO] [jobs]: Job created: 2690e37d-bf9d-4019-aa07-33e845e12c84 for file: 1dfd52f6-cf5d-4e26-9cf0-e3e1360744a7.mp3
+[2026-08-02 10:20:23] [INFO] [jobs]: Job created: a0079b53-8136-4247-afbc-63065cd7d91c for file: 1dfd52f6-cf5d-4e26-9cf0-e3e1360744a7 (mp3cut.net).mp3
+[2026-08-02 10:45:17] [INFO] [jobs]: Job completed successfully: a0079b53-8136-4247-afbc-63065cd7d91c

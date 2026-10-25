@@ -1,0 +1,101 @@
+:root {
+    --bg-primary: #121214;
+    --bg-secondary: #1a1a1e;
+    --card-bg: #23232a;
+    --brand-color: #8b2500; /* رنگ قهوه‌ای آجری لوگو */
+    --brand-hover: #a62d00;
+    --text-main: #f0f0f2;
+    --text-muted: #a0a0ab;
+    --border-color: #343440;
+    --accent-glow: rgba(139, 37, 0, 0.25);
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-main);
+    font-family: 'Vazirmatn', 'Tahoma', sans-serif;
+    direction: rtl;
+    margin: 0;
+    padding: 0;
+}
+
+/* هدر سامانه به همراه لوگو و کپی‌رایت */
+.header-container {
+    background-color: var(--bg-secondary);
+    border-bottom: 2px solid var(--brand-color);
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 15px var(--accent-glow);
+}
+
+.brand-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.brand-logo {
+    height: 55px;
+    width: auto;
+    border-radius: 6px;
+    background: #fff;
+    padding: 3px;
+}
+
+.brand-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.brand-slogan {
+    font-size: 0.8rem;
+    color: var(--brand-color);
+    letter-spacing: 1px;
+    margin-top: 2px;
+}
+
+/* کارت هشدار و پیشنهاد سخت‌افزار */
+.hardware-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-right: 4px solid var(--brand-color);
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 900px;
+}
+
+.badge-gpu {
+    background-color: var(--brand-color);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.badge-cpu {
+    background-color: #4a4a5a;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+/* فوتر با واترمارک جلوگیری از نقض حق کپی‌رایت */
+.copyright-footer {
+    text-align: center;
+    padding: 15px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border-color);
+    margin-top: 40px;
+    background-color: var(--bg-secondary);
+}
+
+.copyright-footer strong {
+    color: var(--brand-color);
+}

@@ -1,0 +1,25 @@
+venv\Scripts\activate
+
+
+
+ببین در سامانه به من خطای خطا در پردازش صوت: open() got an unexpected keyword argument 'metadata_errors' را می دهد.
+در محیط cmd هم به من 
+
+(venv) C:\Users\pc-1\Desktop\Speech To Text_Offline - Gemini>python web_server.py
+[*] در حال راه‌اندازی سرور وب گرافیکی سامانه...
+ * Serving Flask app 'web_server'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.5:5000
+Press CTRL+C to quit
+127.0.0.1 - - [25/Oct/2026 13:09:23] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [25/Oct/2026 13:09:23] "GET /static/style.css HTTP/1.1" 304 -
+127.0.0.1 - - [25/Oct/2026 13:09:23] "GET /static/logo.jpg HTTP/1.1" 304 -
+[*] بارگذاری مدل Whisper (small) روی CPU با فرمت int8...
+[*] شروع پردازش صوت: C:\Users\pc-1\Desktop\Speech To Text_Offline - Gemini\uploads\sample.mp3
+127.0.0.1 - - [25/Oct/2026 13:09:30] "POST /upload HTTP/1.1" 200 -
+127.0.0.1 - - [25/Oct/2026 13:09:30] "GET /static/style.css HTTP/1.1" 304 -
+127.0.0.1 - - [25/Oct/2026 13:09:30] "GET /static/logo.jpg HTTP/1.1" 304 -
+ را نمایش می دهد.

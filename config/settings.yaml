@@ -1,0 +1,335 @@
+###############################################################
+# PS2T - Persian Speech To Text
+#
+# Main Configuration File
+#
+# Version: 2.1.0
+#
+# Responsibility:
+#   - Application configuration
+#   - Speech Engine selection
+#   - Offline AI Model path
+#   - Hardware configuration
+#
+###############################################################
+
+
+
+###############################################################
+# Application
+###############################################################
+
+app:
+
+  name: "Persian Speech To Text (PS2T)"
+
+  version: "2.1.0"
+
+  host: "127.0.0.1"
+
+  port: 8000
+
+
+
+
+
+###############################################################
+# Speech Engine Configuration
+###############################################################
+
+engine:
+
+
+  #############################################################
+  # Active Engine
+  #############################################################
+
+  default_engine: "whisper"
+
+
+
+  #############################################################
+  # Whisper Model
+  #############################################################
+
+  #
+  # Logical model name
+  #
+  # Supported:
+  #
+  # tiny
+  # base
+  # small
+  # medium
+  # large-v3
+  #
+
+  default_model: "medium"
+
+
+
+  #
+  # Local Offline Model Path
+  #
+  # Example:
+  #
+  # Speech To Text
+  # |
+  # +-- models
+  #      |
+  #      +-- faster-whisper-medium
+  #
+
+  model_path: "models/faster-whisper-medium"
+
+
+
+  #############################################################
+  # Language
+  #############################################################
+
+  default_language: "fa"
+
+
+
+
+
+  #############################################################
+  # Hardware
+  #############################################################
+
+  #
+  # auto:
+  #   Detect GPU automatically
+  #
+  # cpu:
+  #   Force CPU mode
+  #
+  # cuda:
+  #   Force GPU mode
+  #
+
+  device: "auto"
+
+
+
+
+
+  #############################################################
+  # Whisper Runtime Configuration
+  #############################################################
+
+  whisper:
+
+
+    #
+    # Search quality
+    #
+
+    beam_size: 5
+
+
+
+    #
+    # Voice Activity Detection
+    #
+
+    vad_filter: true
+
+
+
+    #
+    # CPU optimization
+    #
+    # Recommended:
+    # int8
+    #
+
+    cpu_compute_type: "int8"
+
+
+
+    #
+    # GPU optimization
+    #
+    # Recommended:
+    # float16
+    #
+
+    gpu_compute_type: "float16"
+
+
+
+
+
+###############################################################
+# Directory Structure
+###############################################################
+
+paths:
+
+
+  #
+  # AI Models
+  #
+
+  models_dir: "models"
+
+
+
+  #
+  # Uploaded files
+  #
+
+  uploads_dir: "uploads"
+
+
+
+  #
+  # Export files
+  #
+
+  outputs_dir: "outputs"
+
+
+
+  #
+  # Application logs
+  #
+
+  logs_dir: "logs"
+
+
+
+  #
+  # Temporary processing files
+  #
+
+  temp_dir: "temp"
+
+
+
+
+
+###############################################################
+# Upload Configuration
+###############################################################
+
+upload:
+
+
+  #
+  # Maximum upload size (MB)
+  #
+
+  max_file_size_mb: 2048
+
+
+
+  #
+  # Allowed extensions
+  #
+
+  allowed_extensions:
+
+    - mp3
+    - wav
+    - m4a
+    - mp4
+    - avi
+    - mkv
+    - flac
+
+
+
+
+
+###############################################################
+# Processing
+###############################################################
+
+processing:
+
+
+  #
+  # Remove generated WAV after processing
+  #
+
+  cleanup_temp_files: true
+
+
+
+  #
+  # Single user mode
+  #
+  # One transcription at a time
+  #
+
+  max_parallel_jobs: 1
+
+
+
+
+
+###############################################################
+# Dictionary
+###############################################################
+
+dictionary:
+
+
+  enabled: true
+
+
+  path: "app/dictionary/custom_dict.json"
+
+
+
+
+
+###############################################################
+# Export
+###############################################################
+
+export:
+
+
+  txt: true
+
+
+  docx: true
+
+
+
+
+
+###############################################################
+# Logging
+###############################################################
+
+logging:
+
+
+  level: "INFO"
+
+
+  retention_days: 60
+
+
+
+
+
+###############################################################
+# UI
+###############################################################
+
+ui:
+
+
+  theme: "dark"
+
+
+  font_size: "medium"
+
+
+  responsive: true
