@@ -127,6 +127,15 @@ class PersianPunctuationRestorer:
             if end < len(text) and not text[end].isspace():
                 continue
             label = id2label.get(pred_id, id2label.get(str(pred_id), str(pred_id)))
+            if str(label).upper().startswith("LABEL_"):
+                # The model card defines this label order when config labels are generic.
+                label = {
+                    0: "EMPTY",
+                    1: "COMMA",
+                    2: "QUESTION",
+                    3: "PERIOD",
+                    4: "COLON",
+                }.get(pred_id, "EMPTY")
             mark = self._punctuation_for(label)
             if not mark:
                 continue
