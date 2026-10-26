@@ -1,6 +1,6 @@
 import asyncio
-import math
 import subprocess
+import time
 import uuid
 from pathlib import Path
 
@@ -42,6 +42,7 @@ def _split_audio(input_path: Path, output_dir: Path):
 
 
 async def process_job_background(job_id: str, input_file_path: Path):
+    started_at = time.monotonic()
     wav_path = settings.temp_dir / f"{job_id}.wav"
     chunk_dir = settings.temp_dir / f"{job_id}_chunks"
     try:
@@ -91,7 +92,7 @@ async def process_job_background(job_id: str, input_file_path: Path):
             segments=all_segments,
             language=first_result.language,
             audio_duration_seconds=max(duration, first_result.audio_duration_seconds),
-            processing_time_seconds=sum(0 for _ in []), 
+            processing_time_seconds=round(time.monotonic() - started_at, 2),
             engine_name=first_result.engine_name,
             model_name=first_result.model_name,
             device_used=first_result.device_used
