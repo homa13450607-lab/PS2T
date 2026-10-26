@@ -17,6 +17,7 @@ from app.dictionary.processor import DictionaryProcessor
 from app.export.txt_exporter import TxtExporter
 from app.export.word_exporter import WordExporter
 from app.export.srt_exporter import SrtExporter
+from app.core.text_formatter import format_segments
 
 router = APIRouter()
 dict_processor = DictionaryProcessor()
@@ -88,7 +89,7 @@ async def process_job_background(job_id: str, input_file_path: Path):
         duration = max((s.end_seconds for s in all_segments), default=0.0)
         combined = SpeechResult(
             job_id=job_id,
-            full_text="\n".join(full_text_parts),
+            full_text=format_segments(all_segments) or "\n\n".join(full_text_parts),
             segments=all_segments,
             language=first_result.language,
             audio_duration_seconds=max(duration, first_result.audio_duration_seconds),
