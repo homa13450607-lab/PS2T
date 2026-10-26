@@ -35,7 +35,11 @@ class PersianPunctuationRestorer:
 
         model_dir: Path = settings.punctuation_model_path
         required = ("config.json", "tokenizer_config.json", "tokenizer.json")
-        if not model_dir.is_dir() or not all((model_dir / name).is_file() for name in required):
+        has_weights = model_dir.is_dir() and any(
+            (model_dir / name).is_file()
+            for name in ("model.safetensors", "pytorch_model.bin")
+        )
+        if not model_dir.is_dir() or not all((model_dir / name).is_file() for name in required) or not has_weights:
             self._warn_once(
                 "Persian punctuation model not found at %s; keeping transcript text unchanged. "
                 "See config/settings.yaml and the model setup instructions.",
