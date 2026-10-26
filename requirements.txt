@@ -8,4 +8,5 @@ ffmpeg-python>=0.2.0
 python-docx>=1.1.0
 psutil>=5.9.8
 gputil>=1.4.0
-python-multipart>=0.0.9transformers>=4.40.0,<5.0.0
+python-multipart>=0.0.9
+transformers>=4.40.0,<5.0.0
