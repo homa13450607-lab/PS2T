@@ -9,21 +9,89 @@
 <main>
 <section class="hardware-card">
 <h2>بارگذاری فایل صوتی یا ویدئویی</h2><p>فایل‌های طولانی به قطعات ۵ دقیقه‌ای تقسیم می‌شوند.</p>
-<form id="upload-form"><input id="audio-file" type="file" accept=".mp3,.wav,.m4a,.mp4,.avi,.mkv,.flac,.ogg,.aac" required><button type="submit">شروع تبدیل</button></form>
+<form id="upload-form"><input id="audio-file" type="file" accept=".mp3,.wav,.m4a,.mp4,.avi,.mkv,.flac,.ogg,.aac" required><div class="actions"><button id="start-button" type="submit">شروع تبدیل</button><button id="clear-workspace" type="button" class="secondary">پاک‌کردن فایل و نتیجه</button></div></form>
 <div id="progress-area" hidden><div class="progress-label"><span id="stage">در حال آماده‌سازی…</span><strong id="percent">0%</strong></div><progress id="progress" value="0" max="100"></progress><p id="status"></p></div>
 <p id="error" role="alert"></p>
 </section>
-<section class="hardware-card" id="result-card" hidden><h2>متن پیاده‌سازی‌شده</h2><textarea id="transcript" readonly></textarea><div class="downloads"><a id="download-txt">دانلود TXT</a><a id="download-docx">دانلود Word (DOCX)</a><a id="download-srt">دانلود زیرنویس (SRT)</a></div></section>
+<section class="hardware-card" id="result-card" hidden>
+<h2>متن پیاده‌سازی‌شده</h2><textarea id="transcript" readonly></textarea>
+<div class="downloads"><a id="download-txt">دانلود TXT</a><a id="download-docx">دانلود Word (DOCX)</a><a id="download-srt">دانلود زیرنویس (SRT)</a></div>
+<h3>متن به همراه زمان شروع و پایان</h3><p>زمان‌ها نسبت به ابتدای فایل صوتی هستند. هر ردیف، یک قطعه از متن تشخیص‌داده‌شده را نشان می‌دهد.</p>
+<div class="segment-table-wrapper"><table class="segment-table"><thead><tr><th>شروع</th><th>پایان</th><th>متن تشخیص‌داده‌شده</th><th>اطمینان</th></tr></thead><tbody id="segments-body"></tbody></table></div>
+</section>
 <section class="hardware-card"><h2>مدیریت دیکشنری</h2><p>هر خط یک جفت واژه با قالب «عبارت اشتباه = عبارت جایگزین» است. ذخیره‌سازی آنلاین در فایل custom_dict.json انجام می‌شود.</p><textarea id="dictionary" spellcheck="false" aria-label="ویرایش دیکشنری"></textarea><div class="actions"><button id="load-dictionary" type="button" class="secondary">بارگذاری مجدد</button><button id="save-dictionary" type="button">ذخیره دیکشنری</button></div><p id="dictionary-message"></p></section>
 </main><footer class="copyright-footer">PS2T · پردازش آفلاین گفتار به متن</footer>
 <script>
 const $=id=>document.getElementById(id);
 let activeJob=null;
+let busy=false;
 function showError(message){$("error").textContent=message||"";}
+function setBusy(value){busy=value;$("audio-file").disabled=value;$("start-button").disabled=value;$("clear-workspace").disabled=value;}
+function clearWorkspace(){
+  if(busy)return;
+  $("audio-file").value="";
+  $("transcript").value="";
+  $("segments-body").replaceChildren();
+  $("result-card").hidden=true;
+  $("progress-area").hidden=true;
+  $("progress").value=0;
+  $("percent").textContent="0%";
+  $("stage").textContent="در انتظار فایل";
+  $("status").textContent="";
+  showError("");
+  activeJob=null;
+}
+$("clear-workspace").addEventListener("click",clearWorkspace);
 async function loadDictionary(){const r=await fetch("/api/v1/dictionary");if(!r.ok)throw new Error("بارگذاری دیکشنری ناموفق بود");const d=await r.json();$("dictionary").value=Object.entries(d.entries).map(([k,v])=>k+" = "+v).join("\n");$("dictionary-message").textContent="دیکشنری بارگذاری شد.";}
 $("load-dictionary").addEventListener("click",async()=>{try{await loadDictionary()}catch(e){$("dictionary-message").textContent=e.message}});
 $("save-dictionary").addEventListener("click",async()=>{try{const entries={};for(const [i,line] of $("dictionary").value.split(/\r?\n/).entries()){if(!line.trim())continue;const pos=line.indexOf("=");if(pos<1)throw new Error("خط "+(i+1)+" باید شامل علامت = باشد");const key=line.slice(0,pos).trim(),value=line.slice(pos+1).trim();if(!key||!value)throw new Error("خط "+(i+1)+" خالی است");if(Object.hasOwn(entries,key))throw new Error("کلید تکراری: "+key);entries[key]=value;}const r=await fetch("/api/v1/dictionary",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({entries})});const d=await r.json();if(!r.ok)throw new Error(d.detail||"ذخیره ناموفق بود");$("dictionary-message").textContent="ذخیره شد؛ "+d.count+" واژه."; }catch(e){$("dictionary-message").textContent=e.message;}});
-$("upload-form").addEventListener("submit",async e=>{e.preventDefault();showError("");$("result-card").hidden=true;const file=$("audio-file").files[0];if(!file)return;const data=new FormData();data.append("file",file);$("progress-area").hidden=false;$("progress").value=0;$("percent").textContent="0%";$("stage").textContent="بارگذاری فایل";$("status").textContent="در حال ارسال فایل…";try{const r=await fetch("/api/v1/transcribe",{method:"POST",body:data});const d=await r.json();if(!r.ok)throw new Error(d.detail||"بارگذاری ناموفق بود");activeJob=d.job_id;await pollJob(activeJob);}catch(err){showError(err.message);$("status").textContent="پردازش ناموفق بود";}});
-async function pollJob(id){while(true){const r=await fetch("/api/v1/jobs/"+encodeURIComponent(id));const d=await r.json();if(!r.ok)throw new Error(d.detail||"دریافت وضعیت ناموفق بود");const value=Number(d.progress)||0;$("progress").value=value;$("percent").textContent=Math.round(value)+"%";$("stage").textContent=d.stage||d.status;$("status").textContent="وضعیت: "+d.status;if(d.status==="COMPLETED"){const result=d.result;$("transcript").value=result.full_text||"";$("result-card").hidden=false;for(const fmt of ["txt","docx","srt"]){$("download-"+fmt).href="/api/v1/download/"+encodeURIComponent(id)+"/"+fmt;$("download-"+fmt).setAttribute("download","");}return;}if(d.status==="FAILED")throw new Error(d.error||"خطا در پردازش");await new Promise(resolve=>setTimeout(resolve,1500));}}
+function renderSegments(segments){
+  const body=$("segments-body");
+  body.replaceChildren();
+  for(const seg of (segments||[])){
+    const row=document.createElement("tr");
+    for(const value of [seg.start_time||"--:--:--",seg.end_time||"--:--:--",seg.text||"",Number.isFinite(Number(seg.confidence))?Number(seg.confidence).toFixed(1)+"%":"—"]){
+      const cell=document.createElement("td");
+      cell.textContent=String(value);
+      row.appendChild(cell);
+    }
+    body.appendChild(row);
+  }
+}
+$("upload-form").addEventListener("submit",async e=>{
+  e.preventDefault();if(busy)return;
+  showError("");
+  $("result-card").hidden=true;
+  $("segments-body").replaceChildren();
+  const file=$("audio-file").files[0];if(!file)return;
+  const data=new FormData();data.append("file",file);
+  $("progress-area").hidden=false;$("progress").value=0;$("percent").textContent="0%";$("stage").textContent="بارگذاری فایل";$("status").textContent="در حال ارسال فایل…";
+  setBusy(true);
+  try{
+    const r=await fetch("/api/v1/transcribe",{method:"POST",body:data});
+    const d=await r.json();if(!r.ok)throw new Error(d.detail||"بارگذاری ناموفق بود");
+    activeJob=d.job_id;
+    await pollJob(activeJob);
+  }catch(err){
+    showError(err.message);$("status").textContent="پردازش ناموفق بود";
+  }finally{setBusy(false);}
+});
+async function pollJob(id){
+  while(true){
+    const r=await fetch("/api/v1/jobs/"+encodeURIComponent(id));
+    const d=await r.json();if(!r.ok)throw new Error(d.detail||"دریافت وضعیت ناموفق بود");
+    const value=Number(d.progress)||0;$("progress").value=value;$("percent").textContent=Math.round(value)+"%";$("stage").textContent=d.stage||d.status;$("status").textContent="وضعیت: "+d.status;
+    if(d.status==="COMPLETED"){
+      const result=d.result;
+      $("transcript").value=result.full_text||"";
+      renderSegments(result.segments);
+      $("result-card").hidden=false;
+      for(const fmt of ["txt","docx","srt"]){$("download-"+fmt).href="/api/v1/download/"+encodeURIComponent(id)+"/"+fmt;$("download-"+fmt).setAttribute("download","");}
+      return;
+    }
+    if(d.status==="FAILED")throw new Error(d.error||"خطا در پردازش");
+    await new Promise(resolve=>setTimeout(resolve,1500));
+  }
+}
 loadDictionary().catch(e=>$("dictionary-message").textContent=e.message);
 </script></body></html>
