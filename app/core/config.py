@@ -61,6 +61,10 @@ class Settings:
     @property
     def dictionary_enabled(self): return self.get("dictionary", "enabled", True)
     @property
+    def punctuation_enabled(self): return self.get("punctuation", "enabled", True)
+    @property
+    def punctuation_model_path(self): return self.base_dir / self.get("punctuation", "model_path", "models/persian-punctuation")
+    @property
     def dictionary_path(self): return self.base_dir / self.get("dictionary", "path", "app/dictionary/custom_dict.json")
 
 
