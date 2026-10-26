@@ -25,7 +25,7 @@ class WordExporter:
 
         doc.add_heading("متن کامل", level=2).alignment = WD_ALIGN_PARAGRAPH.RIGHT
         # Keep paragraph boundaries from the formatted transcript in the DOCX.
-        for paragraph_text in (result.full_text or "").split("\\n\\n"):
+        for paragraph_text in (result.full_text or "").split("\n\n"):
             if not paragraph_text.strip():
                 continue
             p_full = doc.add_paragraph(paragraph_text.strip())
