@@ -1,14 +1,17 @@
 import json
 import re
+import threading
 from pathlib import Path
+from app.core.config import settings
 
 class DictionaryProcessor:
-    def __init__(self, dict_path: str = "custom_dict.json"):
-        self.dict_file = Path(__file__).resolve().parent / dict_path
+    def __init__(self, dict_path=None):
+        self.dict_file = Path(dict_path) if dict_path else settings.dictionary_path
+        self._lock = threading.RLock()
         self.dictionary = self._load_dictionary()
 
-    def _load_dictionary(self) -> dict:
-        default_dict = {
+    def _default_dictionary(self):
+        return {
             "وی ام ور": "VMware",
             "زبیکس": "Zabbix",
             "گرافانا": "Grafana",
@@ -20,30 +23,44 @@ class DictionaryProcessor:
             "آتش دخیل چادور زهران میشدو": "آتش دخیل چادر زهرا نمی‌شد و"
         }
 
-        # اگر فایل وجود نداشت، آن را با مقادیر پیش‌فرض می‌سازیم
+    def _load_dictionary(self):
         if not self.dict_file.exists():
-            self.dict_file.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.dict_file, "w", encoding="utf-8") as f:
-                json.dump(default_dict, f, ensure_ascii=False, indent=2)
-            print(f"[*] دیکشنری پیش‌فرض ایجاد شد.")
-            return default_dict
-        
-        # خواندن امن فایل با کنترل خطای ساختار JSON
+            data = self._default_dictionary()
+            self.save_dictionary(data)
+            return data
         try:
-            with open(self.dict_file, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                print(f"[*] دیکشنری سفارشی با {len(data)} کلمه بارگذاری شد.")
-                return data
-        except Exception as e:
-            print(f"[!] هشدار: فایل دیکشنری نامعتبر است ({e}). استفاده از دیکشنری پیش‌فرض ایمن...")
-            return default_dict
+            data = json.loads(self.dict_file.read_text(encoding="utf-8"))
+            if not isinstance(data, dict) or not all(isinstance(k, str) and isinstance(v, str) for k, v in data.items()):
+                raise ValueError("Dictionary must be a JSON object of string pairs")
+            return data
+        except (OSError, ValueError, json.JSONDecodeError):
+            # Keep the existing file untouched; expose safe defaults until it is corrected.
+            return self._default_dictionary()
 
-    def get_initial_prompt(self) -> str:
-        return ", ".join(self.dictionary.values())
+    def reload(self):
+        with self._lock:
+            self.dictionary = self._load_dictionary()
+            return dict(self.dictionary)
 
-    def apply_post_processing(self, text: str) -> str:
+    def save_dictionary(self, data):
+        if not isinstance(data, dict) or not all(isinstance(k, str) and isinstance(v, str) and k.strip() and v.strip() for k, v in data.items()):
+            raise ValueError("Dictionary must contain non-empty string keys and values")
+        self.dict_file.parent.mkdir(parents=True, exist_ok=True)
+        temp_path = self.dict_file.with_suffix(self.dict_file.suffix + ".tmp")
+        temp_path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        temp_path.replace(self.dict_file)
+        with self._lock:
+            self.dictionary = dict(data)
+        return dict(self.dictionary)
+
+    def get_initial_prompt(self):
+        with self._lock:
+            return ", ".join(self.dictionary.values())
+
+    def apply_post_processing(self, text):
         processed_text = text
-        for wrong, correct in self.dictionary.items():
-            pattern = re.compile(re.escape(wrong), re.IGNORECASE)
-            processed_text = pattern.sub(correct, processed_text)
+        with self._lock:
+            items = sorted(self.dictionary.items(), key=lambda item: len(item[0]), reverse=True)
+        for wrong, correct in items:
+            processed_text = re.sub(re.escape(wrong), lambda _match: correct, processed_text, flags=re.IGNORECASE)
         return processed_text

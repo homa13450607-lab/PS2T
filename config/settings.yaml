@@ -284,6 +284,17 @@ dictionary:
   path: "app/dictionary/custom_dict.json"
 
 
+###############################################################
+# Persian punctuation restoration (optional local model)
+###############################################################
+
+punctuation:
+
+  enabled: true
+
+  model_path: "models/persian-punctuation"
+
+
 
 
 

@@ -1,47 +1,97 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سامانه تبدیل گفتار به متن | HD</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PS2T | تبدیل گفتار به متن</title><link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-
-    <!-- هدر اختصاصی سامانه با برند HD -->
-    <header class="header-container">
-        <div class="brand-section">
-            <img src="{{ url_for('static', filename='logo.jpg') }}" alt="HD Logo" class="brand-logo">
-            <div>
-                <h1 class="brand-title">سامانه هوشمند تبدیل گفتار به متن (PS2T)</h1>
-                <div class="brand-slogan">Precision In Every Digital Byte</div>
-            </div>
-        </div>
-    </header>
-
-    <main style="padding: 40px 20px; max-width: 900px; margin: 0 auto;">
-        <div class="hardware-card">
-            <h2>بارگذاری فایل صوتی</h2>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">فایل صوتی خود را (MP3, WAV) بارگذاری کنید تا هوش مصنوعی به صورت کاملاً آفلاین آن را پیاده‌سازی کند.</p>
-            
-            <form action="/upload" method="POST" enctype="multipart/form-data" style="margin-top: 20px;">
-                <input type="file" name="audio_file" accept="audio/*" required style="background: var(--bg-primary); padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; width: 100%; color: white; margin-bottom: 15px;">
-                <button type="submit" style="background-color: var(--brand-color); color: white; border: none; padding: 12px 25px; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: bold; transition: 0.3s;">شروع تبدیل هوشمند</button>
-            </form>
-        </div>
-
-        {% if transcript %}
-        <div class="hardware-card" style="margin-top: 30px;">
-            <h3>نتیجه تبدیل صوت:</h3>
-            <textarea readonly style="width: 100%; height: 250px; background: var(--bg-primary); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 15px; font-family: inherit; font-size: 1rem; margin-top: 10px; resize: vertical;">{{ transcript }}</textarea>
-        </div>
-        {% endif %}
-    </main>
-
-    <!-- فوتر با کپی‌رایت اختصاصی برند -->
-    <footer class="copyright-footer">
-        تمامی حقوق محفوظ است. طراحی‌شده با <strong>HD</strong> — <em>Precision In Every Digital Byte</em>
-    </footer>
-
-</body>
-</html>
+<header class="header-container"><div><h1>سامانه تبدیل گفتار به متن (PS2T)</h1><p>پردازش آفلاین فارسی · وضعیت زنده · خروجی چندفرمتی</p></div></header>
+<main>
+<section class="hardware-card">
+<h2>بارگذاری فایل صوتی یا ویدئویی</h2><p>فایل‌های طولانی به قطعات ۵ دقیقه‌ای تقسیم می‌شوند.</p>
+<form id="upload-form"><input id="audio-file" type="file" accept=".mp3,.wav,.m4a,.mp4,.avi,.mkv,.flac,.ogg,.aac" required><div class="actions"><button id="start-button" type="submit">شروع تبدیل</button><button id="clear-workspace" type="button" class="secondary">پاک‌کردن فایل و نتیجه</button></div></form>
+<div id="progress-area" hidden><div class="progress-label"><span id="stage">در حال آماده‌سازی…</span><strong id="percent">0%</strong></div><progress id="progress" value="0" max="100"></progress><p id="status"></p></div>
+<p id="error" role="alert"></p>
+</section>
+<section class="hardware-card" id="result-card" hidden>
+<h2>متن پیاده‌سازی‌شده</h2><p>متن کامل می‌تواند نشانه‌گذاری فارسی داشته باشد؛ جدول زیر متن قطعات و زمان‌بندی آن‌ها را برای بررسی دقیق‌تر نگه می‌دارد.</p><textarea id="transcript" readonly></textarea>
+<div class="downloads"><a id="download-txt">دانلود TXT</a><a id="download-docx">دانلود Word (DOCX)</a><a id="download-srt">دانلود زیرنویس (SRT)</a></div>
+<h3>متن به همراه زمان شروع و پایان</h3><p>زمان‌ها نسبت به ابتدای فایل صوتی هستند. هر ردیف، یک قطعه از متن تشخیص‌داده‌شده را نشان می‌دهد.</p>
+<div class="segment-table-wrapper"><table class="segment-table"><thead><tr><th>شروع</th><th>پایان</th><th>متن تشخیص‌داده‌شده</th><th>اطمینان</th></tr></thead><tbody id="segments-body"></tbody></table></div>
+</section>
+<section class="hardware-card"><h2>مدیریت دیکشنری</h2><p>هر خط یک جفت واژه با قالب «عبارت اشتباه = عبارت جایگزین» است. ذخیره‌سازی آنلاین در فایل custom_dict.json انجام می‌شود.</p><textarea id="dictionary" spellcheck="false" aria-label="ویرایش دیکشنری"></textarea><div class="actions"><button id="load-dictionary" type="button" class="secondary">بارگذاری مجدد</button><button id="save-dictionary" type="button">ذخیره دیکشنری</button></div><p id="dictionary-message"></p></section>
+</main><footer class="copyright-footer">PS2T · پردازش آفلاین گفتار به متن</footer>
+<script>
+const $=id=>document.getElementById(id);
+let activeJob=null;
+let busy=false;
+function showError(message){$("error").textContent=message||"";}
+function setBusy(value){busy=value;$("audio-file").disabled=value;$("start-button").disabled=value;$("clear-workspace").disabled=value;}
+function clearWorkspace(){
+  if(busy)return;
+  $("audio-file").value="";
+  $("transcript").value="";
+  $("segments-body").replaceChildren();
+  $("result-card").hidden=true;
+  $("progress-area").hidden=true;
+  $("progress").value=0;
+  $("percent").textContent="0%";
+  $("stage").textContent="در انتظار فایل";
+  $("status").textContent="";
+  showError("");
+  activeJob=null;
+}
+$("clear-workspace").addEventListener("click",clearWorkspace);
+async function loadDictionary(){const r=await fetch("/api/v1/dictionary");if(!r.ok)throw new Error("بارگذاری دیکشنری ناموفق بود");const d=await r.json();$("dictionary").value=Object.entries(d.entries).map(([k,v])=>k+" = "+v).join("\n");$("dictionary-message").textContent="دیکشنری بارگذاری شد.";}
+$("load-dictionary").addEventListener("click",async()=>{try{await loadDictionary()}catch(e){$("dictionary-message").textContent=e.message}});
+$("save-dictionary").addEventListener("click",async()=>{try{const entries={};for(const [i,line] of $("dictionary").value.split(/\r?\n/).entries()){if(!line.trim())continue;const pos=line.indexOf("=");if(pos<1)throw new Error("خط "+(i+1)+" باید شامل علامت = باشد");const key=line.slice(0,pos).trim(),value=line.slice(pos+1).trim();if(!key||!value)throw new Error("خط "+(i+1)+" خالی است");if(Object.hasOwn(entries,key))throw new Error("کلید تکراری: "+key);entries[key]=value;}const r=await fetch("/api/v1/dictionary",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({entries})});const d=await r.json();if(!r.ok)throw new Error(d.detail||"ذخیره ناموفق بود");$("dictionary-message").textContent="ذخیره شد؛ "+d.count+" واژه."; }catch(e){$("dictionary-message").textContent=e.message;}});
+function renderSegments(segments){
+  const body=$("segments-body");
+  body.replaceChildren();
+  for(const seg of (segments||[])){
+    const row=document.createElement("tr");
+    for(const value of [seg.start_time||"--:--:--",seg.end_time||"--:--:--",seg.text||"",Number.isFinite(Number(seg.confidence))?Number(seg.confidence).toFixed(1)+"%":"—"]){
+      const cell=document.createElement("td");
+      cell.textContent=String(value);
+      row.appendChild(cell);
+    }
+    body.appendChild(row);
+  }
+}
+$("upload-form").addEventListener("submit",async e=>{
+  e.preventDefault();if(busy)return;
+  showError("");
+  $("result-card").hidden=true;
+  $("segments-body").replaceChildren();
+  const file=$("audio-file").files[0];if(!file)return;
+  const data=new FormData();data.append("file",file);
+  $("progress-area").hidden=false;$("progress").value=0;$("percent").textContent="0%";$("stage").textContent="بارگذاری فایل";$("status").textContent="در حال ارسال فایل…";
+  setBusy(true);
+  try{
+    const r=await fetch("/api/v1/transcribe",{method:"POST",body:data});
+    const d=await r.json();if(!r.ok)throw new Error(d.detail||"بارگذاری ناموفق بود");
+    activeJob=d.job_id;
+    await pollJob(activeJob);
+  }catch(err){
+    showError(err.message);$("status").textContent="پردازش ناموفق بود";
+  }finally{setBusy(false);}
+});
+async function pollJob(id){
+  while(true){
+    const r=await fetch("/api/v1/jobs/"+encodeURIComponent(id));
+    const d=await r.json();if(!r.ok)throw new Error(d.detail||"دریافت وضعیت ناموفق بود");
+    const value=Number(d.progress)||0;$("progress").value=value;$("percent").textContent=Math.round(value)+"%";$("stage").textContent=d.stage||d.status;$("status").textContent="وضعیت: "+d.status;
+    if(d.status==="COMPLETED"){
+      const result=d.result;
+      $("transcript").value=result.full_text||"";
+      renderSegments(result.segments);
+      $("result-card").hidden=false;
+      for(const fmt of ["txt","docx","srt"]){$("download-"+fmt).href="/api/v1/download/"+encodeURIComponent(id)+"/"+fmt;$("download-"+fmt).setAttribute("download","");}
+      return;
+    }
+    if(d.status==="FAILED")throw new Error(d.error||"خطا در پردازش");
+    await new Promise(resolve=>setTimeout(resolve,1500));
+  }
+}
+loadDictionary().catch(e=>$("dictionary-message").textContent=e.message);
+</script></body></html>
