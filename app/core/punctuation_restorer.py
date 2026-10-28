@@ -83,12 +83,25 @@ class PersianPunctuationRestorer:
 
     @staticmethod
     def _punctuation_for(label: str) -> Optional[str]:
-        name = str(label).upper().split(".")[-1]
+        # ParsBERT checkpoint currently uses labels such as B-. and B-،.
+        # Keep support for descriptive labels from compatible checkpoints too.
+        name = str(label).strip().upper()
         return {
+            "O": None,
+            "EMPTY": None,
+            "B-EMPTY": None,
+            "B-.": ".",
+            "B-:": ":",
+            "B-،": "،",
+            "B-؟": "؟",
             "COMMA": "،",
+            "B-COMMA": "،",
             "QUESTION": "؟",
+            "B-QUESTION": "؟",
             "PERIOD": ".",
+            "B-PERIOD": ".",
             "COLON": ":",
+            "B-COLON": ":",
         }.get(name)
 
     def _restore_paragraph(self, text: str) -> str:
